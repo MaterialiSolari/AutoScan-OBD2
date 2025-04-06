@@ -1,9 +1,12 @@
 #include <Arduino.h>
 #include <mcp_can.h>
 #include <SPI.h>
+#include <LiquidCrystal.h>
 
 const int SPI_CS_pin = 10;
 MCP_CAN CAN(SPI_CS_pin);
+
+LiquidCrystal lcd(7, 8, 9, 10, 11, 12);  // RS, E, D4, D5, D6, D7
 
 // Function to request data from ECU
 void requestData(byte len, byte mode, byte pid) {
@@ -111,6 +114,7 @@ double readData(byte len, byte mode, byte pid) {
 void setup() {
   Serial.begin(9600);
   Serial.println("Starting ----SET-UP----");
+  lcd.begin(16, 2);
 
   byte idmodeset = MCP_ANY; // This sets the CAN controller to any mode
   byte speedset = CAN_500KBPS; // 500 Kbps CAN speed
@@ -128,9 +132,11 @@ void loop() {
   // Request Engine RPM (PID 0x0C) using Mode 0x01
   double rpm = readData(8, 0x01, 0x0C);
   if (rpm >= 0) {
-    Serial.print("Engine RPM: ");
-    Serial.println(rpm);
-  } else{
+    lcd.clear();  // Clear the display before updating
+    lcd.setCursor(0, 0);
+    lcd.print("Engine RPM: ");
+    lcd.print(rpm);
+   } else{
     Serial.print("Engine RPM at 0");
   }
 
